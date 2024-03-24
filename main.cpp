@@ -119,11 +119,6 @@ void heapsort(int a[], int n){
         pq.pop();
     }
 }
-void countRadixDec(int a[], int n){///e tot un counting sort, doar ca imparte intrarile din array
-    const int BASE=10;
-    int ct[BASE]={0}, index[BASE]={0};
-    for(int )
-}
 void radixSort(int a[], int n, int base)
 {
     queue<int> buc[BMAX];///bucket-urile in care punem numerele in functie de cifra de pe pozitia j
