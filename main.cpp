@@ -119,15 +119,49 @@ void heapsort(int a[], int n){
         pq.pop();
     }
 }
-void countRadixDec(int a[], int n){///e tot un counting sort, doar ca imparte intrarile din array
-    const int BASE=10;
-    int ct[BASE]={0}, index[BASE]={0};
-    for(int )
+void radixSort(int a[], int n, int base)
+{
+    queue<int> buc[BMAX];///bucket-urile in care punem numerele in functie de cifra de pe pozitia j
+    int maxx=0,ct=0;
+    for(int i=0;i<n;i++)
+    {
+        if(maxx<a[i])
+        {
+            maxx=a[i];
+        }
+    }
+    while(maxx>0)
+    {
+        maxx/=base;
+        ct++;
+    }
+    int po=1;
+    int cif;
+    int it=0;
+    for(int j=0;j<ct;j++)
+    {
+        for(int i=0;i<n;i++)
+        {
+            cif=(a[i]/po)%base;
+            buc[cif].push(a[i]);
+        }
+        it=0;
+        for(int i=0;i<base;i++)
+        {
+            while(!buc[i].empty())
+            {
+                a[it]=buc[i].front();
+                buc[i].pop();
+                it++;
+            }
+        }
+        po*=base;
+    }
 }
 int main()
 {
     int a[7]={2, 4, 5, 7, 1, 6, 3};
-    shellSort(a, 7);
+    radixSort(a, 7, 4);
     for(int i=0; i<7; i++)
         cout<<a[i]<<" ";
     return 0;
