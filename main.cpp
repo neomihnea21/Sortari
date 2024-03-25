@@ -2,33 +2,41 @@
 #include <iostream>
 #include<cstring>
 #include<queue>
+#include<chrono>
+#include<algorithm>
 using namespace std;
-ifstream fin("siruri.txt");
-ofstream fout("timpi.txt");
 ///pentru simplitate, sa presupunem ca nu sunt chei negative
-bool isSorted(int a[], int n){
+bool isSorted(vector<double> a, int n){
     for(int i=1; i<n; i++)
         if(a[i]<a[i-1])
           return false;
     return true;
 }
-void bubble(double a[], int n){
-    for(int i=0; i<n-1; i++){
-        for(int j=0; j<n-i-1; j++)
-            if(a[j]>a[j+1])
-              swap(a[j], a[j+1]);
-    }
+void bubble(vector<double> &a, int n){
+    if(n<11000)
+     for(int i=0; i<n-1; i++){
+       for(int j=0; j<n-i-1; j++)
+         if(a[j]>a[j+1])
+            swap(a[j], a[j+1]);
+     }
+    else cout<<"NU SE POATE FACE BUBBLE SORT";
 }
 const int MAXR=1e8;
 int ct[MAXR];
-void counting(int a[], int n){
+void countingSort(vector<int> &a, int n){
+    for(int i=0; i<n; i++){
+        if(a[i]!=(int)(a[i])){
+            cout<<"NU SE POATE FACE COUNTING SORT, NU SUNT INTREGI\n";
+            return;
+        }
+    }
     int lo=1e9, hi=-1;
     for(int i=0; i<n; i++){
         lo=min(lo, a[i]);
         hi=max(hi, a[i]);
     }///la counting, vectorul e automat normalizat
     if(hi-lo>1e8){
-        fout<<"NU SE POATE FACE COUNTING SORT\n";
+        cout<<"NU SE POATE FACE COUNTING SORT\n";
         return;
     }
     memset(ct, 0, sizeof(ct[0])*(hi-lo+1));///trebuie initializat vectorul cu zerouri, cat trebuie
@@ -43,7 +51,8 @@ void counting(int a[], int n){
         }
     }
 }
-void shellSort(int a[], int n){
+void shellSort(vector<double> &a, int n){
+   if(n<55000){
     vector<int> gaps;
     int start=1;
     while(start<n) start<<=1;
@@ -60,58 +69,59 @@ void shellSort(int a[], int n){
             a[j]=temp;
         }
     }
+   }
+   else{
+      cout<<"NU MERGE SHELLSORT\n";
+   }
 }
 ///mergesort
-void merging(int a[], int lo, int mid, int hi){
-    const int MAXR=1e4;
-    int L[MAXR];///aici vom pune interclasarea
-    int i=lo, j=mid+1, k=0;
+vector<double> L(1e8, 0);///sa fie gata alocat spatiul, resize-urile in recursie duc la 80% mai mult timp
+void merging(vector<double> &a, int lo, int mid, int hi){
+    int i=lo, j=mid+1, index=0;
     while((i<mid+1)&&(j<hi+1)){
         if(a[i]<a[j]){
-            L[k]=a[i], k++, i++;
+            L[index]=a[i], index++, i++;
         }
         else{
-            L[k]=a[j], k++, j++;
+            L[index]=a[j], index++, j++;
         }
         if(i==mid+1)
             while(j<hi+1)
-              L[k]=a[j], k++, j++;
+              L[index]=a[j], index++, j++;
         if(j==hi+1)
             while(i<mid+1)
-              L[k]=a[i], k++, i++;
+              L[index]=a[i], index++, i++;
     }
     for(int i=lo; i<=hi; i++)
         a[i]=L[i-lo];
 }
-void mergesort(int a[], int lo, int hi){///va fi nevoie de apeluri recursive
-   if(lo<hi){
+void mergesort(vector<double> &a, int lo, int hi){///va fi nevoie de apeluri recursive
+   if(lo<hi){///SE APELEAZA CU (a, 0, len-1)!!
       int mid=lo+(hi-lo)/2;
       mergesort(a, lo, mid);
       mergesort(a, mid+1, hi);
       merging(a, lo, mid, hi);
    }
 }
-///quicksort va avea functia de pivotare separata
-int pivotare(int a[], int lo, int hi){
-     int pivot=a[lo], index=hi; ///pivotul e prima chestie, nu da in patrat
-     for(int i=hi; i>lo; i--){
-         if(a[i]>pivot){
-            swap(a[i], a[index]);
-            index--;
-         }
-     }
-     swap(a[index], a[lo]);
-     return index;
-}
-void quicksort(int a[], int lo, int hi){
+///am mutat pivotarea de la qs inhouse, un call recursiv il incetineste ca vai de viata lui
+void quicksort(vector<double> &a, int lo, int hi, int codPivot){///SE APELEAZA cu (a, 0, n-1) -sorteaza intre indicii lo si hi in vector, inclusiv
    if(lo<hi){
-      int pivot=pivotare(a, lo, hi);///pivotarea intoarce locul unde se va afla pivotul
-      quicksort(a, lo, pivot-1);
-      quicksort(a, pivot+1, hi);
+      if(codPivot==1)
+         swap(a[(lo+hi)/2], a[hi]);
+      int pivot=a[hi], j=lo-1;///ultimul e intotdeauna pivot, pentru alegeri diferite se va muta acolo, sa nu bag 2 pivotari
+      for(int i=lo; i<=hi; i++){
+         if(a[i]<pivot){
+            j++;
+            swap(a[i], a[j]);
+         }
+      }
+      swap(a[j+1], a[hi]);
+      quicksort(a, lo, j, codPivot);
+      quicksort(a, j+2, hi, codPivot);
    }
 }
-void heapsort(int a[], int n){
-    priority_queue<int> pq;
+void heapsort(vector<double> &a, int n){
+    priority_queue<double> pq;
     for(int i=0; i<n; i++)
         pq.push(a[i]);
     for(int i=0; i<n; i++){
@@ -119,9 +129,9 @@ void heapsort(int a[], int n){
         pq.pop();
     }
 }
-void radixSort(int a[], int n, int base)
+void radixSort(vector<int> &a, int n, int base)
 {
-    queue<int> buc[BMAX];///bucket-urile in care punem numerele in functie de cifra de pe pozitia j
+    queue<int> buc[256];///bucket-urile in care punem numerele in functie de cifra de pe pozitia j, vom lucra cu baza maxima 2^16
     int maxx=0,ct=0;
     for(int i=0;i<n;i++)
     {
@@ -130,26 +140,21 @@ void radixSort(int a[], int n, int base)
             maxx=a[i];
         }
     }
-    while(maxx>0)
-    {
+    while(maxx>0){
         maxx/=base;
         ct++;
     }
     int po=1;
     int cif;
     int it=0;
-    for(int j=0;j<ct;j++)
-    {
-        for(int i=0;i<n;i++)
-        {
+    for(int j=0; j<ct; j++){
+        for(int i=0; i<n; i++){
             cif=(a[i]/po)%base;
             buc[cif].push(a[i]);
         }
         it=0;
-        for(int i=0;i<base;i++)
-        {
-            while(!buc[i].empty())
-            {
+        for(int i=0;i<base;i++){
+            while(!buc[i].empty()){
                 a[it]=buc[i].front();
                 buc[i].pop();
                 it++;
@@ -160,9 +165,24 @@ void radixSort(int a[], int n, int base)
 }
 int main()
 {
-    int a[7]={2, 4, 5, 7, 1, 6, 3};
-    radixSort(a, 7, 4);
-    for(int i=0; i<7; i++)
-        cout<<a[i]<<" ";
+    vector<double> a;
+    vector<int> aInt; ///vom tine 2 versiuni ale aceluiasi vector: cu double si cu int, pentru tipurile de sortari
+    ifstream fin("siruri.txt");
+    ofstream fout("results.out");
+    int n; fin>>n;
+    bool suntIntregi=true;
+    for(int i=0; i<n; i++){
+        double temp; fin>>temp;
+        a.push_back(temp);
+        if(temp!=(int)(temp)){
+            suntIntregi=false;
+        }
+        aInt.push_back((int)(temp));
+    }
+    auto lo=chrono::high_resolution_clock::now();
+    radixSort(aInt, n, 10);
+    auto hi=chrono::high_resolution_clock::now();
+    chrono::duration<double>ans=hi-lo;
+    fout<<ans.count()<<"\n";
     return 0;
 }
