@@ -12,14 +12,18 @@ bool isSorted(vector<double> a, int n){
           return false;
     return true;
 }
-void bubble(vector<double> &a, int n){
-    if(n<11000)
-     for(int i=0; i<n-1; i++){
-       for(int j=0; j<n-i-1; j++)
-         if(a[j]>a[j+1])
-            swap(a[j], a[j+1]);
-     }
-    else cout<<"NU SE POATE FACE BUBBLE SORT";
+void insertion(vector<double> &a, int n){
+    if(n<20000){
+        for(int i=1; i<n; i++){
+            double key=a[i], j=i-1;
+            while(j>=0&&a[j]>key){
+                a[j+1]=a[j];
+                j--;
+            }
+            a[j+1]=key;
+        }
+    }
+    else cout<<"NU SE POATE FACE INSERTION SORT";
 }
 const int MAXR=1e8;
 int ct[MAXR];
@@ -36,7 +40,7 @@ void countingSort(vector<int> &a, int n){
         hi=max(hi, a[i]);
     }///la counting, vectorul e automat normalizat
     if(hi-lo>1e8){
-        cout<<"NU SE POATE FACE COUNTING SORT\n";
+        cout<<"NU SE POATE FACE COUNTING SORT, SUNT PREA MARI\n";
         return;
     }
     memset(ct, 0, sizeof(ct[0])*(hi-lo+1));///trebuie initializat vectorul cu zerouri, cat trebuie
@@ -180,7 +184,7 @@ int main()
         aInt.push_back((int)(temp));
     }
     auto lo=chrono::high_resolution_clock::now();
-    radixSort(aInt, n, 10);
+    heapsort(a, n);
     auto hi=chrono::high_resolution_clock::now();
     chrono::duration<double>ans=hi-lo;
     fout<<ans.count()<<"\n";
