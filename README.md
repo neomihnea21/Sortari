@@ -2,7 +2,7 @@
 <br>
 <h3> Sortari </h3>
 Aici se afla implementarea a 7 sortari, cu script de testare, timpi de rulare pe varii teste, si script de prezentre a datelor(realizat cu numpy). <br>
-Sortari:
+Sortari implemetate de noi:
 <ul>
   <li> ShellSort </li>
   <li> Insertion Sort</li>
